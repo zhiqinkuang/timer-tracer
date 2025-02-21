@@ -10,12 +10,12 @@ interface StatisticsProps {
 
 // 定义颜色映射
 const activityColors: { [key: string]: string } = {
-  work: "#FF5733", // 红色
-  exercise: "#33FF57", // 绿色
-  leisure: "#3357FF", // 蓝色
-  study: "#FFC300", // 黄色
-  social: "#DAF7A6", // 浅绿色
-  travel: "#C70039", // 深红色
+  sleep: "#4A90E2", // 蓝色
+  work: "#7ED321", // 绿色
+  study: "#F5A623", // 橙色
+  food: "#D0021B", // 红色
+  other: "#8B572A", // 棕色
+  internet: "#BD10E0", // 紫色
   // 添加其他活动类型及其颜色
 };
 

@@ -32,6 +32,9 @@ export function Timer({ onActivityAdded }: { onActivityAdded: (activities: Activ
       setIsRunning(true);
       setStartTime(Number(savedStartTime));
       setActivityType(savedActivityType as keyof typeof activityTypes);
+    } else {
+      // 如果没有恢复状态，重置 elapsedTime
+      setElapsedTime(0);
     }
 
     let interval: NodeJS.Timeout
@@ -50,7 +53,7 @@ export function Timer({ onActivityAdded }: { onActivityAdded: (activities: Activ
       // Start timer
       const now = Date.now();
       setStartTime(now);
-      setElapsedTime(0);
+      setElapsedTime(0); // 重置经过的时间
       localStorage.setItem("isRunning", "true");
       localStorage.setItem("startTime", now.toString());
       localStorage.setItem("activityType", activityType);
