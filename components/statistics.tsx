@@ -8,6 +8,17 @@ interface StatisticsProps {
   activities: Activity[]
 }
 
+// 定义颜色映射
+const activityColors: { [key: string]: string } = {
+  work: "#FF5733", // 红色
+  exercise: "#33FF57", // 绿色
+  leisure: "#3357FF", // 蓝色
+  study: "#FFC300", // 黄色
+  social: "#DAF7A6", // 浅绿色
+  travel: "#C70039", // 深红色
+  // 添加其他活动类型及其颜色
+};
+
 export function Statistics({ activities }: StatisticsProps) {
   // 检查活动数据
   if (!activities || !Array.isArray(activities)) {
@@ -39,7 +50,7 @@ export function Statistics({ activities }: StatisticsProps) {
       return {
         name: label,
         value: Number((typeMinutes / 60).toFixed(2)),
-        color: activityTypes[type].color,
+        color: activityColors[type] || "#CCCCCC", // 使用定义的颜色，默认颜色为灰色
       }
     })
     .filter((item) => item.value > 0)

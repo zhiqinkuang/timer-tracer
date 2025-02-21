@@ -3,14 +3,14 @@
 import { useState, useEffect, useCallback } from "react"
 import { ActivityIcon } from "./activity-icon"
 import { Button } from "@/components/ui/button"
-import { addActivity } from "@/lib/storage"
+import { addActivity, clearRecordsIfNeeded } from "@/lib/storage"
 import { type Activity, activityTypes } from "@/activity-types"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 export function Timer({ onActivityAdded }: { onActivityAdded: (activities: Activity[]) => void }) {
   const [isRunning, setIsRunning] = useState(false)
-  const [time, setTime] = useState(0)
-  const [startTime, setStartTime] = useState<string>("")
+  const [startTime, setStartTime] = useState<number | null>(null)
+  const [elapsedTime, setElapsedTime] = useState(0)
   const [activityType, setActivityType] = useState<keyof typeof activityTypes>("work")
 
   const formatTime = useCallback((seconds: number) => {
@@ -20,42 +20,64 @@ export function Timer({ onActivityAdded }: { onActivityAdded: (activities: Activ
     return `${String(hrs).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
   }, [])
 
-  const formatTimeString = useCallback((date: Date) => {
-    return date.toTimeString().split(" ")[0]
-  }, [])
-
   useEffect(() => {
+    clearRecordsIfNeeded();
+
+    // 从 localStorage 中恢复状态
+    const savedIsRunning = localStorage.getItem("isRunning") === "true";
+    const savedStartTime = localStorage.getItem("startTime");
+    const savedActivityType = localStorage.getItem("activityType");
+
+    if (savedIsRunning && savedStartTime) {
+      setIsRunning(true);
+      setStartTime(Number(savedStartTime));
+      setActivityType(savedActivityType as keyof typeof activityTypes);
+    }
+
     let interval: NodeJS.Timeout
     if (isRunning) {
       interval = setInterval(() => {
-        setTime((prevTime) => prevTime + 1)
+        if (startTime) {
+          setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+        }
       }, 1000)
     }
     return () => clearInterval(interval)
-  }, [isRunning])
+  }, [isRunning, startTime])
 
   const handleStartStop = useCallback(() => {
     if (!isRunning) {
       // Start timer
-      setStartTime(formatTimeString(new Date()))
-      setTime(0)
+      const now = Date.now();
+      setStartTime(now);
+      setElapsedTime(0);
+      localStorage.setItem("isRunning", "true");
+      localStorage.setItem("startTime", now.toString());
+      localStorage.setItem("activityType", activityType);
     } else {
       // Stop timer and save activity
-      const endTime = formatTimeString(new Date())
+      const endTime = new Date().toTimeString().split(" ")[0]
+      const duration = formatTime(elapsedTime)
       const newActivity: Activity = {
         id: Date.now().toString(),
         type: activityType,
-        startTime,
+        startTime: new Date(startTime!).toTimeString().split(" ")[0],
         endTime,
-        duration: formatTime(time),
+        duration,
         icon: activityTypes[activityType].icon,
         color: activityTypes[activityType].color,
       }
       const activities = addActivity(newActivity)
       onActivityAdded(activities)
+
+      // 清除状态
+      setIsRunning(false);
+      localStorage.removeItem("isRunning");
+      localStorage.removeItem("startTime");
+      localStorage.removeItem("activityType");
     }
     setIsRunning(!isRunning)
-  }, [isRunning, startTime, time, onActivityAdded, formatTime, formatTimeString, activityType])
+  }, [isRunning, startTime, onActivityAdded, formatTime, activityType, elapsedTime])
 
   const handleActivityTypeChange = (type: keyof typeof activityTypes) => {
     if (!isRunning) {
@@ -89,9 +111,9 @@ export function Timer({ onActivityAdded }: { onActivityAdded: (activities: Activ
         </PopoverContent>
       </Popover>
       <div className="flex-1">
-        <div className="text-2xl font-medium">{formatTime(time)}</div>
+        <div className="text-2xl font-medium">{formatTime(elapsedTime)}</div>
         <div className="text-sm text-neutral-500">
-          {startTime || "Not started"} - {activityTypes[activityType].label}
+          {startTime ? new Date(startTime).toTimeString().split(" ")[0] : "Not started"} - {activityTypes[activityType].label}
         </div>
       </div>
       <Button variant="outline" className="w-20" onClick={handleStartStop}>
