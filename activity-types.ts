@@ -31,3 +31,11 @@ export const activityTypes = {
   },
 } as const
 
+export type Activity = {
+  id: string;
+  type: keyof typeof activityTypes;
+  duration: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+}

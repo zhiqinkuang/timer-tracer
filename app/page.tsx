@@ -6,7 +6,7 @@ import { ActivityItem } from "@/components/activity-item"
 import { Timer } from "@/components/timer"
 import { Statistics } from "@/components/statistics"
 import { Plus, MoreVertical } from "lucide-react"
-import { loadActivities } from "@/lib/storage"
+import { loadActivities, clearRecordsIfNeeded } from "@/lib/storage"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
@@ -20,6 +20,11 @@ export default function TimePage() {
 
   const handleActivityAdded = (newActivities: Activity[]) => {
     setActivities(newActivities)
+  }
+
+  const handleClearRecords = () => {
+    localStorage.removeItem("time-tracker-activities")
+    setActivities([])
   }
 
   if (showStats) {
@@ -49,7 +54,7 @@ export default function TimePage() {
         </div>
         <h1 className="text-lg font-medium">记录</h1>
         <div className="flex items-center gap-2">
-          <Button size="icon" variant="ghost">
+          <Button size="icon" variant="ghost" onClick={handleClearRecords}>
             <Plus className="w-5 h-5" />
           </Button>
           <Popover>

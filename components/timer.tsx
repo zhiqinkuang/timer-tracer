@@ -78,6 +78,8 @@ export function Timer({ onActivityAdded }: { onActivityAdded: (activities: Activ
       localStorage.removeItem("isRunning");
       localStorage.removeItem("startTime");
       localStorage.removeItem("activityType");
+      setElapsedTime(0); // 重置经过的时间
+      setStartTime(null); // 重置开始时间
     }
     setIsRunning(!isRunning)
   }, [isRunning, startTime, onActivityAdded, formatTime, activityType, elapsedTime])
